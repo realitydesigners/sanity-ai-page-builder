@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         hostname: "cdn.sanity.io",
         pathname: `/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/**`,
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };

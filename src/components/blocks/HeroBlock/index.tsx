@@ -1,5 +1,5 @@
 import { RichText } from "../../richtext";
-import { SanityImage } from "../../sanity-image";
+import { PreviewImage } from "../../preview-image";
 import Link from "next/link";
 
 // Define the missing types
@@ -132,9 +132,8 @@ export function HeroBlock({
 
           {image && (
             <div className="h-96 w-full">
-              <SanityImage
-                asset={image}
-                loading="eager"
+              <PreviewImage
+                image={image}
                 width={800}
                 height={800}
                 priority
