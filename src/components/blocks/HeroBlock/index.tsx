@@ -23,7 +23,7 @@ type PagebuilderType<T extends string> = {
   buttons?: ButtonType[];
 };
 
-type HeroBlockProps = PagebuilderType<"hero">;
+export type HeroBlockProps = PagebuilderType<"hero">;
 
 // Simple Badge component to replace the imported one
 const Badge = ({

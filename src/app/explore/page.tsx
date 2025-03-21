@@ -1,54 +1,41 @@
-import Link from "next/link";
-import { Code, Eye } from "lucide-react";
+"use client";
 
-// For now, we'll hardcode the available blocks
-const AVAILABLE_BLOCKS = [
-  {
-    type: "HeroBlock",
-    title: "Hero Block",
-    description:
-      "A versatile hero section with title, description, image, and CTA buttons",
-  },
-  // Add more blocks here as they become available
-];
+import React from "react";
+import Link from "next/link";
+import { getBlockNames } from "@/src/components/blocks/registry";
 
 export default function ExplorePage() {
+  const blockNames = getBlockNames();
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Explore Blocks</h1>
+    <div className="min-h-screen bg-black text-white">
+      <header className="border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <h1 className="text-2xl font-bold">Explore Blocks</h1>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {AVAILABLE_BLOCKS.map((block) => (
+      <main className="max-w-7xl mx-auto p-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {blockNames.map((blockName) => (
             <Link
-              href={`/explore/${block.type}`}
-              key={block.type}
-              className="group relative bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-blue-500 transition-all"
+              key={blockName}
+              href={`/explore/${blockName}`}
+              className="group relative block overflow-hidden rounded-lg border border-gray-800 bg-gray-900 p-8 transition-colors hover:border-gray-700"
             >
-              <div className="aspect-video relative bg-gray-800">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-lg font-medium">{block.title}</span>
-                </div>
+              <div className="relative z-10">
+                <h2 className="text-xl font-semibold text-white mb-2">
+                  {blockName}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  Click to view documentation, code examples, and live preview.
+                </p>
               </div>
-
-              <div className="p-4">
-                <p className="text-gray-400 mb-4">{block.description}</p>
-
-                <div className="flex items-center gap-4 text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <Eye size={16} />
-                    <span>Preview</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Code size={16} />
-                    <span>Code</span>
-                  </div>
-                </div>
-              </div>
+              <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

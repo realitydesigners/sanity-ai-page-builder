@@ -5,89 +5,7 @@ import { Code, Copy, Eye, Info } from "lucide-react";
 import Link from "next/link";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { HeroBlock } from "@/src/components/blocks/HeroBlock";
-
-type ButtonVariant = "default" | "outline" | "secondary" | "link";
-
-type ButtonType = {
-  _key: string;
-  label: string;
-  variant: ButtonVariant;
-  link: {
-    href: string;
-    openInNewTab: boolean;
-  };
-};
-
-type HeroBlockProps = {
-  _type: "hero";
-  title?: string;
-  badge?: string;
-  richText?: Array<{
-    _type: string;
-    style: string;
-    children: Array<{
-      _type: string;
-      text: string;
-    }>;
-  }>;
-  image?: {
-    _type: string;
-    asset: {
-      _type: string;
-      url: string;
-    };
-    alt: string;
-  };
-  buttons?: ButtonType[];
-};
-
-// Sample data for HeroBlock
-const SAMPLE_HERO_DATA: HeroBlockProps = {
-  _type: "hero",
-  title: "Build Beautiful Pages with Reusable Blocks",
-  badge: "New Release",
-  richText: [
-    {
-      _type: "block",
-      style: "normal",
-      children: [
-        {
-          _type: "span",
-          text: "Create stunning, responsive web pages using our collection of pre-built blocks. Mix and match components to build your perfect page layout.",
-        },
-      ],
-    },
-  ],
-  image: {
-    _type: "image",
-    asset: {
-      _type: "preview",
-      url: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=1600&h=900&q=80",
-    },
-    alt: "Modern workspace with multiple monitors showing code",
-  },
-  buttons: [
-    {
-      _key: "button1",
-      label: "Get Started",
-      variant: "default" as ButtonVariant,
-      link: {
-        href: "#",
-        openInNewTab: false,
-      },
-    },
-    {
-      _key: "button2",
-      label: "Learn More",
-      variant: "outline" as ButtonVariant,
-      link: {
-        href: "#",
-        openInNewTab: false,
-      },
-    },
-  ],
-};
+import { blockExists, getBlockData } from "@/src/components/blocks/registry";
 
 export default function BlockDetailPage({
   params,
@@ -108,8 +26,8 @@ export default function BlockDetailPage({
     }
   };
 
-  // Only render if it's the HeroBlock
-  if (type !== "HeroBlock") {
+  // Check if block exists
+  if (!blockExists(type)) {
     return (
       <div className="min-h-screen bg-black text-white p-8">
         <div className="max-w-7xl mx-auto">
@@ -126,6 +44,10 @@ export default function BlockDetailPage({
     );
   }
 
+  // Get block data
+  const blockData = getBlockData(type);
+  const BlockComponent = blockData.component;
+
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="border-b border-gray-800">
@@ -134,7 +56,7 @@ export default function BlockDetailPage({
             <Link href="/explore" className="text-gray-400 hover:text-white">
               ← Back to Blocks
             </Link>
-            <h1 className="text-2xl font-bold">Hero Block</h1>
+            <h1 className="text-2xl font-bold">{type}</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -178,7 +100,7 @@ export default function BlockDetailPage({
       <main className="max-w-7xl mx-auto p-8">
         {activeTab === "preview" && (
           <div className="border border-[#181818] rounded-lg overflow-hidden">
-            <HeroBlock {...SAMPLE_HERO_DATA} />
+            <BlockComponent {...blockData.sampleData} />
           </div>
         )}
 
@@ -186,17 +108,9 @@ export default function BlockDetailPage({
           <div className="space-y-8">
             <div className="bg-gray-900 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Component Usage</h3>
+                <h3 className="text-lg font-semibold">Component Code</h3>
                 <button
-                  onClick={() =>
-                    copyToClipboard(`<HeroBlock 
-  title="Your Title"
-  badge="Optional Badge"
-  richText={[/* Your rich text content */]}
-  image={/* Your image object */}
-  buttons={[/* Your buttons array */]}
-/>`)
-                  }
+                  onClick={() => copyToClipboard(blockData.code)}
                   className="text-gray-400 hover:text-white"
                 >
                   <Copy size={16} />
@@ -211,14 +125,7 @@ export default function BlockDetailPage({
                   background: "#1f2937",
                 }}
               >
-                {`// Example usage
-<HeroBlock 
-  title="Your Title"
-  badge="Optional Badge"
-  richText={[/* Your rich text content */]}
-  image={/* Your image object */}
-  buttons={[/* Your buttons array */]}
-/>`}
+                {blockData.code}
               </SyntaxHighlighter>
             </div>
 
@@ -227,7 +134,9 @@ export default function BlockDetailPage({
                 <h3 className="text-lg font-semibold">Sample Data Structure</h3>
                 <button
                   onClick={() =>
-                    copyToClipboard(JSON.stringify(SAMPLE_HERO_DATA, null, 2))
+                    copyToClipboard(
+                      JSON.stringify(blockData.sampleData, null, 2)
+                    )
                   }
                   className="text-gray-400 hover:text-white"
                 >
@@ -243,7 +152,7 @@ export default function BlockDetailPage({
                   background: "#1f2937",
                 }}
               >
-                {JSON.stringify(SAMPLE_HERO_DATA, null, 2)}
+                {JSON.stringify(blockData.sampleData, null, 2)}
               </SyntaxHighlighter>
             </div>
           </div>
@@ -254,41 +163,25 @@ export default function BlockDetailPage({
             <h3 className="text-lg font-semibold mb-4">Block Information</h3>
             <div className="prose prose-invert">
               <p>
-                The Hero Block is a versatile component designed for creating
-                impactful page headers. It supports the following features:
+                The {type} is a versatile component designed for creating
+                impactful page sections. It supports the following features:
               </p>
-              <ul>
-                <li>Title with large, bold typography</li>
-                <li>Optional badge text</li>
-                <li>Rich text description</li>
-                <li>Featured image with optimized loading</li>
-                <li>Configurable call-to-action buttons</li>
-                <li>Responsive layout that adapts to all screen sizes</li>
-              </ul>
-              <h4>Required Fields</h4>
-              <ul>
-                <li>
-                  <code>title</code> - The main heading text
-                </li>
-                <li>
-                  <code>_type</code> - Must be "hero"
-                </li>
-              </ul>
-              <h4>Optional Fields</h4>
-              <ul>
-                <li>
-                  <code>badge</code> - Small text label above the title
-                </li>
-                <li>
-                  <code>richText</code> - Formatted description text
-                </li>
-                <li>
-                  <code>image</code> - Featured image object
-                </li>
-                <li>
-                  <code>buttons</code> - Array of call-to-action buttons
-                </li>
-              </ul>
+              {blockData.schema && (
+                <>
+                  <h4>Schema</h4>
+                  <SyntaxHighlighter
+                    language="typescript"
+                    style={oneDark}
+                    customStyle={{
+                      margin: 0,
+                      borderRadius: "0.5rem",
+                      background: "#1f2937",
+                    }}
+                  >
+                    {JSON.stringify(blockData.schema, null, 2)}
+                  </SyntaxHighlighter>
+                </>
+              )}
             </div>
           </div>
         )}
