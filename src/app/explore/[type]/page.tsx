@@ -5,11 +5,7 @@ import { Code, Copy, Eye, Info, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import {
-  blockExists,
-  getBlockData,
-  updateBlockMetadata,
-} from "@/src/components/blocks/registry";
+import { BLOCK_COMPONENTS } from "@/src/components/blocks";
 import { BlockPrompt } from "../components/BlockPrompt";
 
 export default function BlockDetailPage({
@@ -18,6 +14,11 @@ export default function BlockDetailPage({
   params: Promise<{ type: string }>;
 }) {
   const { type } = React.use(params);
+  // Find the matching block key by removing 'Block' suffix
+  const blockKey = Object.keys(BLOCK_COMPONENTS).find(
+    (key) => type.toLowerCase().replace(/block$/i, "") === key.toLowerCase()
+  );
+
   const [activeTab, setActiveTab] = React.useState<"code" | "info" | "prompt">(
     "code"
   );
@@ -26,12 +27,54 @@ export default function BlockDetailPage({
   >("component");
   const [isLoading, setIsLoading] = React.useState(true);
   const [copied, setCopied] = React.useState(false);
+  const [blockData, setBlockData] = React.useState<any>(null);
 
   React.useEffect(() => {
-    updateBlockMetadata().then(() => {
-      setIsLoading(false);
-    });
-  }, []);
+    const fetchBlockData = async () => {
+      try {
+        const response = await fetch("/api/blocks");
+        const data = await response.json();
+        if (data.blocks) {
+          const block = data.blocks.find(
+            (b: any) => b.name.toLowerCase() === type.toLowerCase()
+          );
+          if (block && blockKey) {
+            // Get initial values from the schema object
+            const schemaModule = block.schemaObject;
+            const schema =
+              schemaModule.default || Object.values(schemaModule)[0];
+
+            // Get schema-level initial values
+            const schemaInitialValues = schema.initialValue || {};
+
+            // Get field-level initial values
+            const fieldInitialValues = {};
+            schema.fields?.forEach((field: any) => {
+              if (field.initialValue && !(field.name in schemaInitialValues)) {
+                fieldInitialValues[field.name] = field.initialValue;
+              }
+            });
+
+            setBlockData({
+              ...block,
+              component: BLOCK_COMPONENTS[blockKey],
+              sampleData: {
+                _type: schema.name,
+                ...fieldInitialValues, // Field-level values first
+                ...schemaInitialValues, // Schema-level values override if needed
+              },
+            });
+          }
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch block data:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlockData();
+  }, [type, blockKey]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -53,16 +96,17 @@ export default function BlockDetailPage({
     );
   }
 
-  // Check if block exists
-  if (!blockExists(type)) {
+  if (!blockData || !BLOCK_COMPONENTS[blockKey]) {
     return (
-      <div className="p-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8">Block Not Found</h1>
-          <p>The block type "{type}" is not available for preview.</p>
+      <div className="min-h-screen bg-black text-white p-8">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-4">Block Not Found</h1>
+          <p className="text-gray-400 mb-8">
+            The block type "{type}" is not available for preview.
+          </p>
           <Link
             href="/explore"
-            className="text-blue-500 hover:text-blue-400 mt-4 inline-block"
+            className="text-blue-500 hover:text-blue-400 flex items-center justify-center gap-2"
           >
             ← Back to Blocks
           </Link>
@@ -71,17 +115,13 @@ export default function BlockDetailPage({
     );
   }
 
-  // Get block data
-  const blockData = getBlockData(type);
-  const BlockComponent = blockData.component;
-
   // Function to get the appropriate code based on the active tab
   const getCodeContent = () => {
     switch (activeCodeTab) {
       case "component":
         return blockData.code || "// Loading component code...";
       case "schema":
-        return blockData.schemaCode || "// Loading schema code...";
+        return blockData.schema || "// Loading schema code...";
       default:
         return "";
     }
@@ -95,7 +135,7 @@ export default function BlockDetailPage({
           <h1 className="text-3xl font-bold mb-2 text-white">{type}</h1>
         </div>
         <div className="border border-[#181818] rounded-xl overflow-hidden ">
-          <BlockComponent {...blockData.sampleData} />
+          <blockData.component {...blockData.sampleData} />
         </div>
       </div>
 
@@ -256,7 +296,7 @@ export default function BlockDetailPage({
             <BlockPrompt
               blockName={type}
               componentCode={blockData.code}
-              schemaCode={blockData.schemaCode}
+              schemaCode={blockData.schema}
             />
           )}
         </div>

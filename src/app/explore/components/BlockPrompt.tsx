@@ -27,6 +27,11 @@ export function BlockPrompt({
   };
 
   const generateCursorPrompt = () => {
+    // Convert PascalCase to camelCase for the key in BLOCK_COMPONENTS
+    const camelCaseName = blockName
+      .replace(/Block$/, "")
+      .replace(/^[A-Z]/, (c) => c.toLowerCase());
+
     return `Create a new Sanity block called ${blockName} with the following structure:
 
 First, ensure you have these dependencies in your project:
@@ -36,9 +41,24 @@ First, ensure you have these dependencies in your project:
     "@sanity/client": "latest",
     "lucide-react": "latest",
     "next": "latest",
-    "sanity": "latest"
+    "sanity": "latest",
+    "@portabletext/react": "latest",
+    "@sanity/image-url": "latest"
   }
 }
+\`\`\`
+
+Project Structure:
+\`\`\`
+src/
+  components/
+    blocks/
+      index.ts         # Central registry of all blocks
+      ${blockName}/    # Your block folder
+        index.tsx      # Component implementation
+        schema.ts      # Sanity schema definition
+    richtext/         # Portable Text renderer
+    preview-image/    # Sanity image component
 \`\`\`
 
 Component (src/components/blocks/${blockName}/index.tsx):
@@ -51,32 +71,43 @@ Schema (src/components/blocks/${blockName}/schema.ts):
 ${schemaCode}
 \`\`\`
 
-You'll also need these shared types/components:
+You'll need these shared components:
 - \`RichText\` component for rendering Portable Text
 - \`PreviewImage\` component for Sanity image handling
 - Common schema fields (\`buttonsField\`, \`richTextField\`) in \`@/src/sanity/schemaTypes/common\`
 
-Please set up this block following these steps:
-1. Create a new directory under src/components/blocks/${blockName}
-2. Create the component file (index.tsx) with the provided code
-3. Create the schema file (schema.ts) with the provided code
-4. Update your block registry to include this new block:
+Integration Steps:
+1. Create the block directory: src/components/blocks/${blockName}
+2. Add the component file (index.tsx) with the provided code
+3. Add the schema file (schema.ts) with the provided code
+4. Register the block in src/components/blocks/index.ts:
 
 \`\`\`typescript
-// In your registry file
-import { ${blockName} } from "./${blockName}";
-import { hero } from "./${blockName}/schema";
+// At the top with other schema imports
+import { ${camelCaseName} } from "./${blockName}/schema";
 
-// Add to your registry
-{
-  ${blockName}: {
-    component: ${blockName},
-    schema: hero,
-  }
-}
+// In the component imports section
+import { ${blockName} } from "./${blockName}";
+
+// Add to BLOCK_COMPONENTS (key should be camelCase, value is the PascalCase component)
+export const BLOCK_COMPONENTS = {
+  // ... existing components
+  ${camelCaseName}: ${blockName},
+} as const;
+
+// Add to pageBuilderBlocks array for Sanity Studio
+export const pageBuilderBlocks = [
+  // ... existing blocks
+  ${camelCaseName},
+];
 \`\`\`
 
-The block follows the structure used by the generate-block.ts script, which creates blocks with a component file and schema file in a dedicated directory.`;
+Note: The block name in BLOCK_COMPONENTS uses camelCase (${camelCaseName}), while the component name uses PascalCase (${blockName}). This follows the existing pattern in your blocks registry.
+
+The block will then be available in:
+1. Your page builder through BLOCK_COMPONENTS
+2. Sanity Studio through pageBuilderBlocks
+3. The explore page for previewing and generating new blocks`;
   };
 
   return (

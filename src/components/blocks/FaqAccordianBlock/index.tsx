@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
@@ -39,7 +40,7 @@ const RichText = ({
   return <div className={className}>Content goes here</div>;
 };
 
-export function FaqAccordion({
+export function FaqAccordianBlock({
   eyebrow,
   title,
   subtitle,
@@ -47,7 +48,7 @@ export function FaqAccordion({
   link,
 }: FaqAccordionProps) {
   const [openItemId, setOpenItemId] = useState<string | null>(
-    faqs && faqs.length > 0 ? faqs[0]._id : null,
+    faqs && faqs.length > 0 ? faqs[0]._id : null
   );
 
   const toggleItem = (id: string) => {

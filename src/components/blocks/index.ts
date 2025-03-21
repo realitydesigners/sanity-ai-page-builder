@@ -5,19 +5,17 @@ import { hero } from "./HeroBlock/schema";
 import { imageLinkCards } from "./ImageCardBlock/schema";
 
 // Component imports
-import { CTABlock } from "./CtaBlock";
-import { FaqAccordion } from "./FaqAccordianBlock";
+import { CtaBlock } from "./CtaBlock";
+import { FaqAccordianBlock } from "./FaqAccordianBlock";
 import { HeroBlock } from "./HeroBlock";
-import { ImageLinkCards } from "./ImageCardBlock";
+import { ImageCardBlock } from "./ImageCardBlock";
 
 export const BLOCK_COMPONENTS = {
-  cta: CTABlock,
-  faqAccordion: FaqAccordion,
+  cta: CtaBlock,
+  faqAccordion: FaqAccordianBlock,
   hero: HeroBlock,
-  imageLinkCards: ImageLinkCards,
+  imageLinkCards: ImageCardBlock,
 } as const;
 
 // Export for Sanity Studio schema
 export const pageBuilderBlocks = [hero, cta, faqAccordion, imageLinkCards];
-
-export * from "./types";

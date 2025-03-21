@@ -2,19 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
-import {
-  getBlockNames,
-  updateBlockMetadata,
-} from "@/src/components/blocks/registry";
+import { BLOCK_COMPONENTS } from "@/src/components/blocks";
 
 export default function ExplorePage() {
-  const blockNames = getBlockNames();
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    updateBlockMetadata().then(() => {
+    // Just a small delay to show loading state
+    setTimeout(() => {
       setIsLoading(false);
-    });
+    }, 500);
   }, []);
 
   if (isLoading) {
@@ -28,6 +25,15 @@ export default function ExplorePage() {
       </div>
     );
   }
+
+  // Get block names from BLOCK_COMPONENTS
+  const blockNames = Object.entries(BLOCK_COMPONENTS).map(
+    ([key, component]) => {
+      // Use the actual component name for display
+      const componentName = component.name;
+      return componentName;
+    }
+  );
 
   return (
     <div className="min-h-screen bg-black text-white">
