@@ -134,11 +134,12 @@ export function HeroBlock({
             <div className="h-96 w-full">
               <PreviewImage
                 image={image}
-                width={800}
-                height={800}
+                width={1600}
+                height={900}
                 priority
-                quality={80}
-                className="max-h-96 w-full rounded-3xl object-cover"
+                quality={90}
+                className="h-full w-full rounded-3xl object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               />
             </div>
           )}

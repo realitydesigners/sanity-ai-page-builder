@@ -111,7 +111,7 @@ export default function BlockDetailPage({
   // Only render if it's the HeroBlock
   if (type !== "HeroBlock") {
     return (
-      <div className="min-h-screen bg-gray-950 text-white p-8">
+      <div className="min-h-screen bg-black text-white p-8">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold mb-8">Block Not Found</h1>
           <p>The block type "{type}" is not available for preview.</p>
@@ -127,7 +127,7 @@ export default function BlockDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-black text-white">
       <header className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -177,7 +177,7 @@ export default function BlockDetailPage({
 
       <main className="max-w-7xl mx-auto p-8">
         {activeTab === "preview" && (
-          <div className="bg-white rounded-lg overflow-hidden">
+          <div className="border border-[#181818] rounded-lg overflow-hidden">
             <HeroBlock {...SAMPLE_HERO_DATA} />
           </div>
         )}
