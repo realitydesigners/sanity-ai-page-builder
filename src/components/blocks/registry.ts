@@ -12,9 +12,14 @@ export type BlockRegistry = Record<string, BlockDefinition>;
 
 // Helper function to get initial values from schema
 const getInitialValues = (schema: any) => {
-  const initialValues: any = { _type: schema.name, ...schema.initialValue };
+  const initialValues: any = { _type: schema.name };
 
-  // Merge field-level initial values
+  // Get schema-level initial values
+  if (schema.initialValue) {
+    Object.assign(initialValues, schema.initialValue);
+  }
+
+  // Get field-level initial values
   schema.fields?.forEach((field: any) => {
     if (field.initialValue && !(field.name in initialValues)) {
       initialValues[field.name] = field.initialValue;
@@ -41,9 +46,12 @@ export const getBlockData = (blockName: string) => {
   const block = blockRegistry[blockName];
   if (!block) return null;
 
+  // Get the initial values from the schema for preview/explore
+  const initialValues = getInitialValues(block.schema);
+
   return {
     ...block,
-    sampleData: getInitialValues(block.schema),
+    sampleData: initialValues,
   };
 };
 

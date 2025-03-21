@@ -19,7 +19,7 @@ export default function BlockDetailPage({
   const { type } = React.use(params);
   const [activeTab, setActiveTab] = React.useState<"code" | "info">("code");
   const [activeCodeTab, setActiveCodeTab] = React.useState<
-    "component" | "schema" | "data"
+    "component" | "schema"
   >("component");
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -78,12 +78,9 @@ export default function BlockDetailPage({
       case "component":
         return blockData.code;
       case "schema":
-        // If schema is a string (raw code), use it directly
         return typeof blockData.schema === "string"
           ? blockData.schema
           : JSON.stringify(blockData.schema, null, 2);
-      case "data":
-        return JSON.stringify(blockData.sampleData, null, 2);
       default:
         return "";
     }
@@ -163,16 +160,6 @@ export default function BlockDetailPage({
                   >
                     Schema
                   </button>
-                  <button
-                    onClick={() => setActiveCodeTab("data")}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      activeCodeTab === "data"
-                        ? "bg-blue-500 text-white"
-                        : "text-gray-400 hover:text-white"
-                    }`}
-                  >
-                    Sample Data
-                  </button>
                 </div>
 
                 <div className="relative">
@@ -183,12 +170,12 @@ export default function BlockDetailPage({
                     <Copy size={16} />
                   </button>
                   <SyntaxHighlighter
-                    language={activeCodeTab === "data" ? "json" : "typescript"}
+                    language="typescript"
                     style={oneDark}
                     customStyle={{
                       margin: 0,
                       borderRadius: "0.5rem",
-                      fontSize: "10px",
+                      fontSize: "12px",
                     }}
                     showLineNumbers={true}
                   >

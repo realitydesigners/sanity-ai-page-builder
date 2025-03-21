@@ -13,7 +13,7 @@ export const hero = defineType({
       name: "badge",
       type: "string",
       title: "Badge",
-      initialValue: "New Release",
+      initialValue: "Beta",
     }),
     defineField({
       name: "title",
