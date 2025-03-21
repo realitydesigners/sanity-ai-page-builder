@@ -2,10 +2,32 @@
 
 import React from "react";
 import Link from "next/link";
-import { getBlockNames } from "@/src/components/blocks/registry";
+import {
+  getBlockNames,
+  updateBlockMetadata,
+} from "@/src/components/blocks/registry";
 
 export default function ExplorePage() {
   const blockNames = getBlockNames();
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    updateBlockMetadata().then(() => {
+      setIsLoading(false);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <header className="border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold">Loading Blocks...</h1>
+          </div>
+        </header>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">

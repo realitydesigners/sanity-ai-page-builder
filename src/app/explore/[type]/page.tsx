@@ -5,7 +5,11 @@ import { Code, Copy, Eye, Info } from "lucide-react";
 import Link from "next/link";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { blockExists, getBlockData } from "@/src/components/blocks/registry";
+import {
+  blockExists,
+  getBlockData,
+  updateBlockMetadata,
+} from "@/src/components/blocks/registry";
 
 export default function BlockDetailPage({
   params,
@@ -16,6 +20,16 @@ export default function BlockDetailPage({
   const [activeTab, setActiveTab] = React.useState<"preview" | "code" | "info">(
     "preview"
   );
+  const [activeCodeTab, setActiveCodeTab] = React.useState<
+    "component" | "schema" | "data"
+  >("component");
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    updateBlockMetadata().then(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -25,6 +39,18 @@ export default function BlockDetailPage({
       console.error("Failed to copy text: ", err);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <header className="border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <h1 className="text-2xl font-bold">Loading Block Data...</h1>
+          </div>
+        </header>
+      </div>
+    );
+  }
 
   // Check if block exists
   if (!blockExists(type)) {
@@ -106,55 +132,119 @@ export default function BlockDetailPage({
 
         {activeTab === "code" && (
           <div className="space-y-8">
-            <div className="bg-gray-900 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Component Code</h3>
-                <button
-                  onClick={() => copyToClipboard(blockData.code)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <Copy size={16} />
-                </button>
-              </div>
-              <SyntaxHighlighter
-                language="typescript"
-                style={oneDark}
-                customStyle={{
-                  margin: 0,
-                  borderRadius: "0.5rem",
-                  background: "#1f2937",
-                }}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setActiveCodeTab("component")}
+                className={`px-4 py-2 rounded-lg ${
+                  activeCodeTab === "component"
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
               >
-                {blockData.code}
-              </SyntaxHighlighter>
+                Component
+              </button>
+              <button
+                onClick={() => setActiveCodeTab("schema")}
+                className={`px-4 py-2 rounded-lg ${
+                  activeCodeTab === "schema"
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                Schema
+              </button>
+              <button
+                onClick={() => setActiveCodeTab("data")}
+                className={`px-4 py-2 rounded-lg ${
+                  activeCodeTab === "data"
+                    ? "bg-blue-500 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                Sample Data
+              </button>
             </div>
 
-            <div className="bg-gray-900 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Sample Data Structure</h3>
-                <button
-                  onClick={() =>
-                    copyToClipboard(
-                      JSON.stringify(blockData.sampleData, null, 2)
-                    )
-                  }
-                  className="text-gray-400 hover:text-white"
+            {activeCodeTab === "component" && (
+              <div className="bg-gray-900 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Component Code</h3>
+                  <button
+                    onClick={() => copyToClipboard(blockData.code)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+                <SyntaxHighlighter
+                  language="typescript"
+                  style={oneDark}
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: "0.5rem",
+                    background: "#1f2937",
+                  }}
                 >
-                  <Copy size={16} />
-                </button>
+                  {blockData.code}
+                </SyntaxHighlighter>
               </div>
-              <SyntaxHighlighter
-                language="json"
-                style={oneDark}
-                customStyle={{
-                  margin: 0,
-                  borderRadius: "0.5rem",
-                  background: "#1f2937",
-                }}
-              >
-                {JSON.stringify(blockData.sampleData, null, 2)}
-              </SyntaxHighlighter>
-            </div>
+            )}
+
+            {activeCodeTab === "schema" && (
+              <div className="bg-gray-900 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Schema Definition</h3>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(JSON.stringify(blockData.schema, null, 2))
+                    }
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+                <SyntaxHighlighter
+                  language="typescript"
+                  style={oneDark}
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: "0.5rem",
+                    background: "#1f2937",
+                  }}
+                >
+                  {JSON.stringify(blockData.schema, null, 2)}
+                </SyntaxHighlighter>
+              </div>
+            )}
+
+            {activeCodeTab === "data" && (
+              <div className="bg-gray-900 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Sample Data</h3>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(
+                        JSON.stringify(blockData.sampleData, null, 2)
+                      )
+                    }
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </div>
+                <SyntaxHighlighter
+                  language="json"
+                  style={oneDark}
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: "0.5rem",
+                    background: "#1f2937",
+                  }}
+                >
+                  {JSON.stringify(blockData.sampleData, null, 2)}
+                </SyntaxHighlighter>
+              </div>
+            )}
           </div>
         )}
 
@@ -168,18 +258,15 @@ export default function BlockDetailPage({
               </p>
               {blockData.schema && (
                 <>
-                  <h4>Schema</h4>
-                  <SyntaxHighlighter
-                    language="typescript"
-                    style={oneDark}
-                    customStyle={{
-                      margin: 0,
-                      borderRadius: "0.5rem",
-                      background: "#1f2937",
-                    }}
-                  >
-                    {JSON.stringify(blockData.schema, null, 2)}
-                  </SyntaxHighlighter>
+                  <h4>Schema Fields</h4>
+                  <ul>
+                    {blockData.schema.fields?.map((field: any) => (
+                      <li key={field.name}>
+                        <strong>{field.title || field.name}</strong>
+                        {field.description && ` - ${field.description}`}
+                      </li>
+                    ))}
+                  </ul>
                 </>
               )}
             </div>

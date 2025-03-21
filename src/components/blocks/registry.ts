@@ -1,8 +1,6 @@
 import { type ComponentType } from "react";
 import { HeroBlock } from "./HeroBlock";
 import { SAMPLE_HERO_DATA } from "./HeroBlock/data";
-import { readFileSync } from "fs";
-import { join } from "path";
 
 export type BlockDefinition = {
   component: ComponentType<any>;
@@ -13,44 +11,14 @@ export type BlockDefinition = {
 
 export type BlockRegistry = Record<string, BlockDefinition>;
 
-// Function to read component code
-const readComponentCode = (blockName: string): string => {
-  try {
-    return readFileSync(
-      join(
-        process.cwd(),
-        "src",
-        "components",
-        "blocks",
-        blockName,
-        "index.tsx"
-      ),
-      "utf-8"
-    );
-  } catch (error) {
-    console.error(`Error reading ${blockName} code:`, error);
-    return "";
-  }
-};
-
-// Registry of all available blocks
+// Initialize with known blocks
 export const blockRegistry: BlockRegistry = {
   HeroBlock: {
     component: HeroBlock,
     sampleData: SAMPLE_HERO_DATA,
-    code: `import { RichText } from "../../richtext";
-import { PreviewImage } from "../../preview-image";
-import Link from "next/link";
-
-// ... rest of the code will be loaded dynamically ...`,
+    code: "", // Will be populated from the API
+    schema: null, // Will be populated from the API
   },
-  // Add more blocks here as they are created
-  // Example:
-  // ImageCardBlock: {
-  //   component: ImageCardBlock,
-  //   sampleData: SAMPLE_IMAGE_CARD_DATA,
-  //   code: readComponentCode('ImageCardBlock'),
-  // },
 };
 
 // Helper function to get block names
@@ -71,6 +39,30 @@ export function registerBlock(name: string, definition: BlockDefinition): void {
     );
   }
   blockRegistry[name] = definition;
+}
+
+// Function to update block metadata from API
+export async function updateBlockMetadata() {
+  try {
+    const response = await fetch("/api/blocks");
+    const data = await response.json();
+
+    if (data.blocks) {
+      data.blocks.forEach((block: any) => {
+        if (blockRegistry[block.name]) {
+          blockRegistry[block.name] = {
+            ...blockRegistry[block.name],
+            code: block.code,
+            schema: block.schema,
+            sampleData:
+              block.sampleData || blockRegistry[block.name].sampleData,
+          };
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Failed to update block metadata:", error);
+  }
 }
 
 export default blockRegistry;
