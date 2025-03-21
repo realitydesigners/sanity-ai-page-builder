@@ -72,13 +72,13 @@ export async function GET() {
 
     const blocksData = blockFolders.map((blockName) => {
       const code = readComponentCode(blockName);
-      const schema = readSchemaCode(blockName);
+      const schemaCode = readSchemaCode(blockName);
       const sampleData = readSampleData(blockName);
 
       return {
         name: blockName,
         code,
-        schema,
+        schema: schemaCode,
         sampleData,
       };
     });
