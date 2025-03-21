@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Code, Copy, Eye, Info } from "lucide-react";
+import { Code, Copy, Eye, Info, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -10,6 +10,7 @@ import {
   getBlockData,
   updateBlockMetadata,
 } from "@/src/components/blocks/registry";
+import { BlockPrompt } from "../components/BlockPrompt";
 
 export default function BlockDetailPage({
   params,
@@ -17,11 +18,14 @@ export default function BlockDetailPage({
   params: Promise<{ type: string }>;
 }) {
   const { type } = React.use(params);
-  const [activeTab, setActiveTab] = React.useState<"code" | "info">("code");
+  const [activeTab, setActiveTab] = React.useState<"code" | "info" | "prompt">(
+    "code"
+  );
   const [activeCodeTab, setActiveCodeTab] = React.useState<
     "component" | "schema"
   >("component");
   const [isLoading, setIsLoading] = React.useState(true);
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
     updateBlockMetadata().then(() => {
@@ -32,7 +36,8 @@ export default function BlockDetailPage({
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
@@ -74,11 +79,9 @@ export default function BlockDetailPage({
   const getCodeContent = () => {
     switch (activeCodeTab) {
       case "component":
-        return blockData.code;
+        return blockData.code || "// Loading component code...";
       case "schema":
-        return typeof blockData.schema === "string"
-          ? blockData.schema
-          : JSON.stringify(blockData.schema, null, 2);
+        return blockData.schemaCode || "// Loading schema code...";
       default:
         return "";
     }
@@ -88,25 +91,27 @@ export default function BlockDetailPage({
     <div className="flex h-[calc(100vh-64px)]">
       {/* Preview Section */}
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold mb-2">{type}</h1>
-          <div className="h-px bg-gray-800" />
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+            {type}
+          </h1>
+          <div className="h-px bg-gradient-to-r from-blue-500/50 to-purple-500/50" />
         </div>
-        <div className="border border-[#181818] rounded-lg overflow-hidden ">
+        <div className="border border-gray-800 rounded-xl overflow-hidden bg-white shadow-2xl shadow-blue-500/10">
           <BlockComponent {...blockData.sampleData} />
         </div>
       </div>
 
       {/* Sidebar */}
-      <div className="w-[600px] border-l border-gray-800 overflow-hidden flex flex-col">
+      <div className="w-[600px] border-l border-gray-800 overflow-hidden flex flex-col bg-black/50 backdrop-blur-sm">
         {/* Tabs */}
         <div className="flex border-b border-gray-800">
           <button
             onClick={() => setActiveTab("code")}
-            className={`flex items-center px-4 py-2 ${
+            className={`flex items-center px-6 py-3 transition-colors ${
               activeTab === "code"
-                ? "text-white border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-white"
+                ? "text-white border-b-2 border-blue-500 bg-white/5"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <Code className="mr-2" size={16} />
@@ -114,14 +119,25 @@ export default function BlockDetailPage({
           </button>
           <button
             onClick={() => setActiveTab("info")}
-            className={`flex items-center px-4 py-2 ${
+            className={`flex items-center px-6 py-3 transition-colors ${
               activeTab === "info"
-                ? "text-white border-b-2 border-blue-500"
-                : "text-gray-400 hover:text-white"
+                ? "text-white border-b-2 border-blue-500 bg-white/5"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
           >
             <Info className="mr-2" size={16} />
             Info
+          </button>
+          <button
+            onClick={() => setActiveTab("prompt")}
+            className={`flex items-center px-6 py-3 transition-colors ${
+              activeTab === "prompt"
+                ? "text-white border-b-2 border-blue-500 bg-white/5"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <Wand2 className="mr-2" size={16} />
+            Prompt
           </button>
         </div>
 
@@ -132,40 +148,60 @@ export default function BlockDetailPage({
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setActiveCodeTab("component")}
-                  className={`px-3 py-1 rounded-md text-sm ${
+                  className={`px-4 py-1.5 rounded-lg text-sm transition-all ${
                     activeCodeTab === "component"
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   Component
                 </button>
                 <button
                   onClick={() => setActiveCodeTab("schema")}
-                  className={`px-3 py-1 rounded-md text-sm ${
+                  className={`px-4 py-1.5 rounded-lg text-sm transition-all ${
                     activeCodeTab === "schema"
-                      ? "bg-blue-500 text-white"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   Schema
                 </button>
               </div>
 
-              <div className="relative">
+              <div className="relative group">
                 <button
                   onClick={() => copyToClipboard(getCodeContent())}
-                  className="absolute right-2 top-2 text-gray-400 hover:text-white"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors"
                 >
-                  <Copy size={16} />
+                  {copied ? (
+                    <div className="flex items-center gap-1 text-green-500">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span className="text-xs">Copied!</span>
+                    </div>
+                  ) : (
+                    <Copy size={16} />
+                  )}
                 </button>
                 <SyntaxHighlighter
                   language="typescript"
                   style={oneDark}
                   customStyle={{
                     margin: 0,
-                    borderRadius: "0.5rem",
-                    fontSize: "12px",
+                    padding: "1.5rem",
+                    background: "#1a1b26",
+                    fontSize: "13px",
                   }}
                   showLineNumbers={true}
                 >
@@ -176,34 +212,53 @@ export default function BlockDetailPage({
           )}
 
           {activeTab === "info" && (
-            <div className="p-4">
-              <div className="prose prose-invert prose-sm">
-                <p>
-                  The {type} is a versatile component designed for creating
-                  impactful page sections. It supports the following features:
+            <div className="p-6">
+              <div className="prose prose-invert prose-sm max-w-none">
+                <p className="text-gray-300 leading-relaxed">
+                  The <span className="text-blue-400 font-medium">{type}</span>{" "}
+                  is a versatile component designed for creating impactful page
+                  sections. It supports the following features:
                 </p>
                 {blockData.schema && (
-                  <>
-                    <h4 className="text-sm font-medium mt-4 mb-2">
+                  <div className="mt-8">
+                    <h4 className="text-lg font-medium text-white mb-4">
                       Schema Fields
                     </h4>
-                    <ul className="space-y-2">
+                    <div className="space-y-4">
                       {typeof blockData.schema === "object" &&
                         blockData.schema.fields?.map((field: any) => (
-                          <li key={field.name} className="text-sm">
-                            <strong>{field.title || field.name}</strong>
-                            {field.description && (
-                              <span className="text-gray-400 ml-2">
-                                - {field.description}
+                          <div
+                            key={field.name}
+                            className="p-4 rounded-lg bg-white/5 border border-white/10 hover:border-blue-500/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between">
+                              <strong className="text-blue-400">
+                                {field.title || field.name}
+                              </strong>
+                              <span className="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300">
+                                {field.type}
                               </span>
+                            </div>
+                            {field.description && (
+                              <p className="mt-2 text-sm text-gray-400">
+                                {field.description}
+                              </p>
                             )}
-                          </li>
+                          </div>
                         ))}
-                    </ul>
-                  </>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
+          )}
+
+          {activeTab === "prompt" && (
+            <BlockPrompt
+              blockName={type}
+              componentCode={blockData.code}
+              schemaCode={blockData.schemaCode}
+            />
           )}
         </div>
       </div>

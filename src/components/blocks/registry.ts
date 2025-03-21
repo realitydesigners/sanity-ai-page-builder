@@ -6,6 +6,7 @@ export type BlockDefinition = {
   component: ComponentType<any>;
   schema: any;
   code: string;
+  schemaCode: string;
 };
 
 export type BlockRegistry = Record<string, BlockDefinition>;
@@ -35,6 +36,7 @@ export const blockRegistry: BlockRegistry = {
     component: HeroBlock,
     schema: hero,
     code: "", // Will be populated from the API
+    schemaCode: "", // Will be populated from the API
   },
 };
 
@@ -81,6 +83,7 @@ export async function updateBlockMetadata() {
           blockRegistry[block.name] = {
             ...blockRegistry[block.name],
             code: block.code,
+            schemaCode: block.schema,
           };
         }
       });
