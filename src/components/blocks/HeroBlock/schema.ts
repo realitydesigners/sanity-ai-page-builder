@@ -13,23 +13,60 @@ export const hero = defineType({
       name: "badge",
       type: "string",
       title: "Badge",
+      initialValue: "New Release",
     }),
     defineField({
       name: "title",
       type: "string",
       title: "Title",
+      initialValue: "Build Beautiful Pages with Reusable Blocks",
     }),
     richTextField,
     defineField({
       name: "image",
       type: "image",
       title: "Image",
+      description: "The main image for the hero section",
       options: {
         hotspot: true,
       },
     }),
     buttonsField,
   ],
+  initialValue: {
+    richText: [
+      {
+        _type: "block",
+        style: "normal",
+        children: [
+          {
+            _type: "span",
+            text: "Create stunning, responsive web pages using our collection of pre-built blocks. Mix and match components to build your perfect page layout.",
+          },
+        ],
+      },
+    ],
+    buttons: [
+      {
+        _key: "button1",
+        label: "Get Started",
+        variant: "default",
+        link: {
+          href: "#",
+          openInNewTab: false,
+        },
+      },
+      {
+        _key: "button2",
+        label: "Learn More",
+        variant: "outline",
+        link: {
+          href: "#",
+          openInNewTab: false,
+        },
+      },
+    ],
+  },
   preview: {
     select: {
       title: "title",

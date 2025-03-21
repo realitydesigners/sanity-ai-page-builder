@@ -1,6 +1,7 @@
 import { RichText } from "../../richtext";
 import { PreviewImage } from "../../preview-image";
 import Link from "next/link";
+import Image from "next/image";
 
 // Define the missing types
 type ButtonType = {
@@ -105,6 +106,8 @@ export function HeroBlock({
   image,
   richText,
 }: HeroBlockProps) {
+  const isPreview = !image?.asset;
+
   return (
     <section id="hero" className="mt-4 md:py-16 bg-black">
       <div className="container  mx-auto px-4 md:px-6">
@@ -130,8 +133,19 @@ export function HeroBlock({
             />
           </div>
 
-          {image && (
-            <div className="h-96 w-full">
+          <div className="h-96 w-full">
+            {isPreview ? (
+              <Image
+                src="https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&w=1600&h=900&q=80"
+                width={1600}
+                height={900}
+                priority
+                quality={90}
+                alt="Modern workspace with multiple monitors showing code"
+                className="h-full w-full rounded-3xl object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+              />
+            ) : (
               <PreviewImage
                 image={image}
                 width={1600}
@@ -141,8 +155,8 @@ export function HeroBlock({
                 className="h-full w-full rounded-3xl object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </section>

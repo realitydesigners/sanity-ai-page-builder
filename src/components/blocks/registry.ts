@@ -1,23 +1,35 @@
 import { type ComponentType } from "react";
 import { HeroBlock } from "./HeroBlock";
-import { SAMPLE_HERO_DATA } from "./HeroBlock/data";
+import { hero } from "./HeroBlock/schema";
 
 export type BlockDefinition = {
   component: ComponentType<any>;
-  sampleData: any;
+  schema: any;
   code: string;
-  schema?: any;
 };
 
 export type BlockRegistry = Record<string, BlockDefinition>;
+
+// Helper function to get initial values from schema
+const getInitialValues = (schema: any) => {
+  const initialValues: any = { _type: schema.name, ...schema.initialValue };
+
+  // Merge field-level initial values
+  schema.fields?.forEach((field: any) => {
+    if (field.initialValue && !(field.name in initialValues)) {
+      initialValues[field.name] = field.initialValue;
+    }
+  });
+
+  return initialValues;
+};
 
 // Initialize with known blocks
 export const blockRegistry: BlockRegistry = {
   HeroBlock: {
     component: HeroBlock,
-    sampleData: SAMPLE_HERO_DATA,
+    schema: hero,
     code: "", // Will be populated from the API
-    schema: null, // Will be populated from the API
   },
 };
 
@@ -25,7 +37,15 @@ export const blockRegistry: BlockRegistry = {
 export const getBlockNames = (): string[] => Object.keys(blockRegistry);
 
 // Helper function to get block data
-export const getBlockData = (blockName: string) => blockRegistry[blockName];
+export const getBlockData = (blockName: string) => {
+  const block = blockRegistry[blockName];
+  if (!block) return null;
+
+  return {
+    ...block,
+    sampleData: getInitialValues(block.schema),
+  };
+};
 
 // Helper function to check if a block exists
 export const blockExists = (blockName: string): boolean =>
@@ -53,9 +73,6 @@ export async function updateBlockMetadata() {
           blockRegistry[block.name] = {
             ...blockRegistry[block.name],
             code: block.code,
-            schema: block.schema,
-            sampleData:
-              block.sampleData || blockRegistry[block.name].sampleData,
           };
         }
       });
