@@ -123,8 +123,7 @@ The block follows the structure used by the generate-block.ts script, which crea
             customStyle={{
               margin: 0,
               padding: "1.5rem",
-              background: "#1a1b26",
-              fontSize: "13px",
+              fontSize: "10px",
             }}
           >
             {generateCursorPrompt()}

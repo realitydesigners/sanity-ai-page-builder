@@ -92,18 +92,15 @@ export default function BlockDetailPage({
       {/* Preview Section */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-            {type}
-          </h1>
-          <div className="h-px bg-gradient-to-r from-blue-500/50 to-purple-500/50" />
+          <h1 className="text-3xl font-bold mb-2 text-white">{type}</h1>
         </div>
-        <div className="border border-gray-800 rounded-xl overflow-hidden bg-white shadow-2xl shadow-blue-500/10">
+        <div className="border border-[#181818] rounded-xl overflow-hidden ">
           <BlockComponent {...blockData.sampleData} />
         </div>
       </div>
 
       {/* Sidebar */}
-      <div className="w-[600px] border-l border-gray-800 overflow-hidden flex flex-col bg-black/50 backdrop-blur-sm">
+      <div className="w-[600px] border-l border-[#181818] overflow-hidden flex flex-col bg-black/50 backdrop-blur-sm">
         {/* Tabs */}
         <div className="flex border-b border-gray-800">
           <button
@@ -200,10 +197,12 @@ export default function BlockDetailPage({
                   customStyle={{
                     margin: 0,
                     padding: "1.5rem",
-                    background: "#1a1b26",
-                    fontSize: "13px",
+
+                    fontSize: "10px",
                   }}
                   showLineNumbers={true}
+                  wrapLongLines={false}
+                  wrapLines={false}
                 >
                   {getCodeContent()}
                 </SyntaxHighlighter>

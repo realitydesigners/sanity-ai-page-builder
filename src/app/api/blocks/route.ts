@@ -5,17 +5,15 @@ import { join } from "path";
 // Function to read component code
 const readComponentCode = (blockName: string): string => {
   try {
-    return readFileSync(
-      join(
-        process.cwd(),
-        "src",
-        "components",
-        "blocks",
-        blockName,
-        "index.tsx"
-      ),
-      "utf-8"
+    const filePath = join(
+      process.cwd(),
+      "src",
+      "components",
+      "blocks",
+      blockName,
+      "index.tsx"
     );
+    return readFileSync(filePath, "utf-8");
   } catch (error) {
     console.error(`Error reading ${blockName} component code:`, error);
     return "";
@@ -25,17 +23,15 @@ const readComponentCode = (blockName: string): string => {
 // Function to read schema code
 const readSchemaCode = (blockName: string): string => {
   try {
-    return readFileSync(
-      join(
-        process.cwd(),
-        "src",
-        "components",
-        "blocks",
-        blockName,
-        "schema.ts"
-      ),
-      "utf-8"
+    const filePath = join(
+      process.cwd(),
+      "src",
+      "components",
+      "blocks",
+      blockName,
+      "schema.ts"
     );
+    return readFileSync(filePath, "utf-8");
   } catch (error) {
     console.error(`Error reading ${blockName} schema code:`, error);
     return "";
@@ -47,13 +43,17 @@ const getBlockMetadata = (blockName: string) => {
   try {
     const componentCode = readComponentCode(blockName);
     const schemaCode = readSchemaCode(blockName);
-    const schema = require(`@/src/components/blocks/${blockName}/schema`);
+
+    // Import the schema module dynamically
+    const schemaModule = require(`@/src/components/blocks/${blockName}/schema`);
+    const schema =
+      schemaModule.default || schemaModule[Object.keys(schemaModule)[0]];
 
     return {
       name: blockName,
       code: componentCode,
-      schema: schemaCode,
-      schemaObject: schema,
+      schema: schemaCode, // This is the actual schema code as a string
+      schemaObject: schema, // This is the schema object for runtime use
     };
   } catch (error) {
     console.error(`Error getting metadata for ${blockName}:`, error);
