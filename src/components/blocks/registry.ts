@@ -1,16 +1,27 @@
-import { BlockRegistry } from "./types";
+import { type ComponentType } from "react";
+
+export type BlockDefinition = {
+  component: ComponentType<any>;
+  schema: any;
+  query: {
+    fragment: string;
+    dependencies?: string[];
+  };
+};
+
+type BlockRegistry = Record<string, BlockDefinition>;
 
 const blockRegistry: BlockRegistry = {};
 
 export function registerBlock(
   type: string,
-  component: React.ComponentType<any>,
+  component: ComponentType<any>,
   schema: any,
-  query: { fragment: string; dependencies?: string[] },
+  query: { fragment: string; dependencies?: string[] }
 ) {
   if (blockRegistry[type]) {
     console.warn(
-      `Block type "${type}" is already registered. It will be overwritten.`,
+      `Block type "${type}" is already registered. It will be overwritten.`
     );
   }
 
@@ -21,7 +32,7 @@ export function registerBlock(
   };
 }
 
-export function getBlock(type: string) {
+export function getBlock(type: string): BlockDefinition {
   const block = blockRegistry[type];
   if (!block) {
     throw new Error(`Block type "${type}" not found in registry`);
@@ -29,7 +40,7 @@ export function getBlock(type: string) {
   return block;
 }
 
-export function getAllBlocks() {
+export function getAllBlocks(): BlockRegistry {
   return blockRegistry;
 }
 

@@ -13,24 +13,34 @@ const enabler = defineEnableDraftMode({
 
 // Store last revalidation time
 let lastRevalidationTime = 0;
-const REVALIDATION_THRESHOLD = 2000; // 2 seconds between revalidations
+
+// Increase this value to reduce refreshes - 5 seconds is a good balance
+// between responsiveness and preventing excessive refreshes
+const REVALIDATION_THRESHOLD = 5000; // 5 seconds between revalidations
 
 export async function GET(req: NextRequest) {
   const now = Date.now();
 
+  // Check if the request is from the Studio's presentation iframe
+  const referer = req.headers.get("referer") || "";
+  const isStudioRequest = referer.includes("/studio/presentation");
+
   // Get the response from the draft mode enabler
   const response = await enabler.GET(req);
 
-  // If it's been less than the threshold since the last revalidation,
-  // just return the response without revalidating
-  if (now - lastRevalidationTime < REVALIDATION_THRESHOLD) {
-    return response;
+  // For Studio iframe requests, throttle aggressively to prevent constant refreshing
+  if (isStudioRequest) {
+    // If it's been less than the threshold since the last revalidation,
+    // just return the existing response without revalidating
+    if (now - lastRevalidationTime < REVALIDATION_THRESHOLD) {
+      return response;
+    }
   }
 
   // Otherwise, update the last revalidation time
   lastRevalidationTime = now;
 
-  // Add cache control headers to prevent excessive revalidation
+  // Add cache control headers to prevent browser caching
   response.headers.set("Cache-Control", "no-store, max-age=0");
 
   return response;
