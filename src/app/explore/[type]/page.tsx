@@ -128,7 +128,7 @@ export default function BlockDetailPage({
   };
 
   return (
-    <div className="flex h-[calc(100vh-64px)]">
+    <div className="flex min-h-[calc(100vh-64px)]">
       {/* Preview Section */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="mb-6">
@@ -140,7 +140,7 @@ export default function BlockDetailPage({
       </div>
 
       {/* Sidebar */}
-      <div className="w-[600px] border-l border-[#181818] overflow-hidden flex flex-col bg-black/50 backdrop-blur-sm">
+      <div className="w-[450px] border-l border-[#181818] overflow-hidden flex flex-col bg-black/50 backdrop-blur-sm">
         {/* Tabs */}
         <div className="flex border-b border-gray-800">
           <button
